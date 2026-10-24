@@ -569,6 +569,7 @@ public final class ModListPage extends ListPageBase<ModListPage.ModInfoObject> i
     public static final class ModInfoObject {
         private final LocalModFile localModFile;
         private final ModLocalization localization;
+        private final String abbreviation;
         /// Matching project metadata, or null if the local mod cannot be identified.
         private final @Nullable ModProjectInfo projectInfo;
 
@@ -577,6 +578,12 @@ public final class ModListPage extends ListPageBase<ModListPage.ModInfoObject> i
         ModInfoObject(LocalModFile localModFile) {
             this.localModFile = localModFile;
             this.projectInfo = AddonProjectInfoRegistry.MOD.getInfo(localModFile.getId(), localModFile.getName());
+            this.abbreviation = projectInfo != null && StringUtils.isNotBlank(projectInfo.abbrName())
+                    ? projectInfo.abbrName()
+                    : AddonProjectInfoRegistry.MOD.search(localModFile.getName()).stream()
+                            .map(ModProjectInfo::abbrName)
+                            .filter(StringUtils::isNotBlank)
+                            .findFirst().orElse("");
             String language = HMCLGameLauncher.modLocalizationLanguageTag(I18n.getLocale().getDisplayLocale(),
                     GameVersionNumber.asGameVersion(localModFile.getModManager().getGameVersion()));
             this.localization = ModLocalization.read(localModFile.getFile(), localModFile.getId(), language);
@@ -597,12 +604,12 @@ public final class ModListPage extends ListPageBase<ModListPage.ModInfoObject> i
             String displayName = localModFile.getName();
             String localizedName = localization.name();
             if (StringUtils.isNotBlank(localizedName)) {
-                return displayName.equalsIgnoreCase(localizedName) ? displayName
-                        : AddonProjectInfo.formatDisplayName(displayName, localizedName, "");
+                return AddonProjectInfo.formatDisplayName(localizedName, displayName,
+                        abbreviation);
             }
             if (projectInfo != null && I18n.isUseChinese() && StringUtils.containsChinese(projectInfo.mainName()))
                 return projectInfo.displayName();
-            return displayName;
+            return AddonProjectInfo.formatDisplayName(displayName, "", abbreviation);
         }
 
         private Image getDefaultIcon() {

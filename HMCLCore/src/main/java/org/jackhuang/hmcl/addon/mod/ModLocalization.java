@@ -7,7 +7,8 @@ import org.jackhuang.hmcl.util.io.CompressingUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -20,7 +21,7 @@ public record ModLocalization(Set<String> languages, String name, String descrip
     public static final ModLocalization EMPTY = new ModLocalization(Set.of(), null, null);
 
     public ModLocalization {
-        languages = Set.copyOf(languages);
+        languages = Collections.unmodifiableSet(new LinkedHashSet<>(languages));
     }
 
     public static ModLocalization read(Path file, String modId, String language) {
@@ -28,7 +29,7 @@ public record ModLocalization(Set<String> languages, String name, String descrip
             var assets = tree.getDirectory("assets");
             if (assets == null) return EMPTY;
 
-            Set<String> languages = new HashSet<>();
+            Set<String> languages = new LinkedHashSet<>();
             String name = null;
             String description = null;
             String filename = language.toLowerCase(Locale.ROOT) + ".json";
