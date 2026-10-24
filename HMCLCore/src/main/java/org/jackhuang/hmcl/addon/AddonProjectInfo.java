@@ -78,6 +78,10 @@ public abstract class AddonProjectInfo {
     /// Returns the primary name with a nonblank abbreviation in brackets and a nonblank
     /// secondary name in parentheses. Only the abbreviation is trimmed.
     public String displayName() {
+        return formatDisplayName(mainName, subName, abbrName);
+    }
+
+    public static String formatDisplayName(String mainName, String subName, String abbrName) {
         StringBuilder builder = new StringBuilder();
         if (!abbrName.isBlank())
             builder.append('[').append(abbrName.trim()).append("] ");
